@@ -37,4 +37,11 @@ type Config struct {
 		Name       string `yaml:"name"`
 		Collection string `yaml:"collection"`
 	} `yaml:"database"`
+	Twitch struct {
+		ClientID string `yaml:"client_id"`
+		Secret   string `yaml:"secret"`
+	} `yaml:"twitch"`
+	Api struct {
+		BaseURL string `yaml:"base_url"`
+	} `yaml:"api"`
 }

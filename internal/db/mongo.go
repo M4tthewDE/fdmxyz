@@ -35,7 +35,7 @@ func (mh *MongoHandler) getClient() *mongo.Client {
 
 func (mh *MongoHandler) SaveWebhook(webhook object.Webhook) primitive.ObjectID {
 	client := mh.getClient()
-	collection := client.Database(mh.Config.Database.Name).Collection("endResult")
+	collection := client.Database(mh.Config.Database.Name).Collection("webhook")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -51,6 +51,102 @@ func (mh *MongoHandler) SaveWebhook(webhook object.Webhook) primitive.ObjectID {
 	}
 
 	return res.InsertedID.(primitive.ObjectID)
+}
+
+func (mh *MongoHandler) SaveAuth(auth *object.Authentication) primitive.ObjectID {
+	client := mh.getClient()
+	collection := client.Database(mh.Config.Database.Name).Collection("auth")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	doc, err := ToDoc(auth)
+	if err != nil {
+		panic(err)
+	}
+
+	res, err := collection.InsertOne(ctx, doc)
+	if err != nil {
+		panic(err)
+	}
+
+	return res.InsertedID.(primitive.ObjectID)
+}
+
+func (mh *MongoHandler) UpdateAuth(auth *object.Authentication) {
+	client := mh.getClient()
+	collection := client.Database(mh.Config.Database.Name).Collection("auth")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	doc, err := ToDoc(auth)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = collection.UpdateOne(
+		ctx,
+		bson.M{"Token": auth.Token},
+		doc,
+	)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (mh *MongoHandler) GetAuth() *object.Authentication {
+	client := mh.getClient()
+	collection := client.Database(mh.Config.Database.Name).Collection("auth")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cur, err := collection.Find(
+		ctx,
+		bson.D{},
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	defer cur.Close(context.Background())
+
+	var auth object.Authentication
+	for cur.Next(context.Background()) {
+		err = cur.Decode(&auth)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return &auth
+}
+
+func (mh *MongoHandler) GetPendingWebhook() *object.Webhook {
+	client := mh.getClient()
+	collection := client.Database(mh.Config.Database.Name).Collection("webhook")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cur, err := collection.Find(
+		ctx,
+		bson.D{},
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	defer cur.Close(context.Background())
+
+	var webhook object.Webhook
+	for cur.Next(context.Background()) {
+		err = cur.Decode(&webhook)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return &webhook
 }
 
 func ToDoc(v interface{}) (doc *bson.D, err error) {
