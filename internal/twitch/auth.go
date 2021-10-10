@@ -6,23 +6,18 @@ import (
 	"github.com/m4tthewde/fdmxyz/internal/config"
 	"github.com/m4tthewde/fdmxyz/internal/db"
 	"github.com/m4tthewde/fdmxyz/internal/object"
+	"github.com/nicklaw5/helix/v2"
 )
 
 type AuthenticationHandler struct {
-	config        *config.Config
-	mongoHandler  *db.MongoHandler
-	twitchHandler *TwitchHandler
+	config       *config.Config
+	mongoHandler *db.MongoHandler
 }
 
 func NewAuthenticationHandler(config *config.Config) *AuthenticationHandler {
 	authHandler := AuthenticationHandler{
-		config:        config,
-		mongoHandler:  &db.MongoHandler{Config: config},
-		twitchHandler: &TwitchHandler{},
-	}
-	authHandler.twitchHandler = &TwitchHandler{
-		Config:      config,
-		AuthHandler: &authHandler,
+		config:       config,
+		mongoHandler: &db.MongoHandler{Config: config},
 	}
 
 	return &authHandler
@@ -36,7 +31,7 @@ func (ah *AuthenticationHandler) IsValid() bool {
 		return false
 	}
 
-	isValid, err := ah.twitchHandler.ValidateToken(auth.Token)
+	isValid, err := ah.ValidateToken(auth.Token)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +41,7 @@ func (ah *AuthenticationHandler) IsValid() bool {
 
 func (ah *AuthenticationHandler) GenerateToken() error {
 	// request token from twitch
-	resp, err := ah.twitchHandler.RequestToken()
+	resp, err := ah.RequestToken()
 	if err != nil {
 		return err
 	}
@@ -66,7 +61,7 @@ func (ah *AuthenticationHandler) RegenerateTokenJob() {
 		// if token expires in less than one day
 		auth := ah.mongoHandler.GetAuth()
 		if auth.ExpiresIn < 1000000 {
-			resp, err := ah.twitchHandler.RequestToken()
+			resp, err := ah.RequestToken()
 			if err != nil {
 				panic(err)
 			}
@@ -88,4 +83,54 @@ func (ah *AuthenticationHandler) GetAuth() string {
 		panic("No auth found")
 	}
 	return auth.Token
+}
+
+func (ah *AuthenticationHandler) ValidateToken(token string) (bool, error) {
+	client, err := helix.NewClient(&helix.Options{
+		ClientID: ah.config.Twitch.ClientID,
+	})
+	if err != nil {
+		return false, nil
+	}
+
+	isValid, _, err := client.ValidateToken(token)
+	if err != nil {
+		return false, err
+	}
+
+	return isValid, nil
+}
+
+func (ah *AuthenticationHandler) RequestToken() (*helix.AppAccessTokenResponse, error) {
+	client, err := helix.NewClient(&helix.Options{
+		ClientID:     ah.config.Twitch.ClientID,
+		ClientSecret: ah.config.Twitch.Secret,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := client.RequestAppAccessToken([]string{})
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (ah *AuthenticationHandler) RefreshToken(refreshToken string) (*helix.RefreshTokenResponse, error) {
+	client, err := helix.NewClient(&helix.Options{
+		ClientID:     ah.config.Twitch.ClientID,
+		ClientSecret: ah.config.Twitch.Secret,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := client.RefreshUserAccessToken(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
