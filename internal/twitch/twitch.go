@@ -6,12 +6,12 @@ import (
 	"github.com/nicklaw5/helix/v2"
 )
 
-type TwitchHandler struct {
+type Handler struct {
 	Config      *config.Config
 	AuthHandler *AuthenticationHandler
 }
 
-func (th *TwitchHandler) getClient() (*helix.Client, error) {
+func (th *Handler) getClient() (*helix.Client, error) {
 	client, err := helix.NewClient(&helix.Options{
 		ClientID:       th.Config.Twitch.ClientID,
 		AppAccessToken: th.AuthHandler.GetAuth(),
@@ -20,7 +20,8 @@ func (th *TwitchHandler) getClient() (*helix.Client, error) {
 	return client, err
 }
 
-func (th *TwitchHandler) RegisterWebhook(webhook *object.Webhook) (*helix.EventSubSubscriptionsResponse, error) {
+func (th *Handler) RegisterWebhook(webhook *object.Webhook) (
+	*helix.EventSubSubscriptionsResponse, error) {
 	client, err := th.getClient()
 	if err != nil {
 		return nil, err
@@ -30,11 +31,11 @@ func (th *TwitchHandler) RegisterWebhook(webhook *object.Webhook) (*helix.EventS
 		Type:    webhook.Typing,
 		Version: "1",
 		Condition: helix.EventSubCondition{
-			BroadcasterUserID: webhook.User_id,
+			BroadcasterUserID: webhook.UserID,
 		},
 		Transport: helix.EventSubTransport{
 			Method:   "webhook",
-			Callback: th.Config.Api.BaseURL + webhook.Callback,
+			Callback: th.Config.API.BaseURL + webhook.Callback,
 			Secret:   webhook.Secret,
 		},
 	}

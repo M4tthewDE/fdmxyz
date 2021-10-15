@@ -25,7 +25,9 @@ func (mh *MongoHandler) getClient() *mongo.Client {
 		Password: mh.Config.Database.Password,
 	}
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(credential))
+	client, err := mongo.Connect(
+		ctx,
+		options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(credential))
 	if err != nil {
 		panic(err)
 	}

@@ -85,7 +85,8 @@ func (ah *AuthenticationHandler) GetAuth() string {
 	return auth.Token
 }
 
-func (ah *AuthenticationHandler) ValidateToken(token string) (bool, error) {
+func (ah *AuthenticationHandler) ValidateToken(token string) (
+	bool, error) {
 	client, err := helix.NewClient(&helix.Options{
 		ClientID: ah.config.Twitch.ClientID,
 	})
@@ -101,7 +102,8 @@ func (ah *AuthenticationHandler) ValidateToken(token string) (bool, error) {
 	return isValid, nil
 }
 
-func (ah *AuthenticationHandler) RequestToken() (*helix.AppAccessTokenResponse, error) {
+func (ah *AuthenticationHandler) RequestToken() (
+	*helix.AppAccessTokenResponse, error) {
 	client, err := helix.NewClient(&helix.Options{
 		ClientID:     ah.config.Twitch.ClientID,
 		ClientSecret: ah.config.Twitch.Secret,
@@ -118,7 +120,8 @@ func (ah *AuthenticationHandler) RequestToken() (*helix.AppAccessTokenResponse, 
 	return resp, nil
 }
 
-func (ah *AuthenticationHandler) RefreshToken(refreshToken string) (*helix.RefreshTokenResponse, error) {
+func (ah *AuthenticationHandler) RefreshToken(refreshToken string) (
+	*helix.RefreshTokenResponse, error) {
 	client, err := helix.NewClient(&helix.Options{
 		ClientID:     ah.config.Twitch.ClientID,
 		ClientSecret: ah.config.Twitch.Secret,
