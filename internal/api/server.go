@@ -25,13 +25,14 @@ func NewServer(config *config.Config) *Server {
 			mongoHandler: &db.MongoHandler{
 				Config: config,
 			},
-			twitchHandler: &twitch.TwitchHandler{
+			twitchHandler: &twitch.Handler{
 				Config: config,
 			},
 		},
 	}
 
-	s.routeHandler.twitchHandler.AuthHandler = twitch.NewAuthenticationHandler(config)
+	s.routeHandler.twitchHandler.AuthHandler =
+		twitch.NewAuthenticationHandler(config)
 
 	return &s
 }

@@ -3,6 +3,8 @@ linters-settings:
     max-complexity: 20
   funlen:
     lines: 100
+  lll:
+    line-length: 85
 linters:
   disable-all: true
   enable:
@@ -33,3 +35,4 @@ linters:
     - whitespace
     - gocognit
     - prealloc
+    - lll

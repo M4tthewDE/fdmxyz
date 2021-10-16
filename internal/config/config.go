@@ -41,7 +41,7 @@ type Config struct {
 		ClientID string `yaml:"client_id"`
 		Secret   string `yaml:"secret"`
 	} `yaml:"twitch"`
-	Api struct {
+	API struct {
 		BaseURL string `yaml:"base_url"`
 	} `yaml:"api"`
 }

@@ -7,8 +7,8 @@ import (
 )
 
 type Webhook struct {
-	Id       string
-	User_id  string
+	ID       string
+	UserID   string
 	Typing   string
 	Status   WebhookStatus
 	Secret   string
