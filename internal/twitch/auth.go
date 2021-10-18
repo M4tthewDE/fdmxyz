@@ -60,17 +60,25 @@ func (ah *AuthenticationHandler) RegenerateTokenJob() {
 	for {
 		// if token expires in less than one day
 		auth := ah.mongoHandler.GetAuth()
-		if auth.ExpiresIn < 1000000 {
+		oldToken := auth.Token
+		//if auth.ExpiresIn < 1000000 {
+		if auth.ExpiresIn < 10000 {
+			err := ah.mongoHandler.DeleteAuth()
+			if err != nil {
+				panic(err)
+			}
+
 			resp, err := ah.RequestToken()
 			if err != nil {
 				panic(err)
 			}
-			// save new token details in databsae
+
+			// save new token details in database
 			auth.Token = resp.Data.AccessToken
 			auth.ExpiresIn = resp.Data.ExpiresIn
 
-			// TODO errors out!!!!!!
-			ah.mongoHandler.UpdateAuth(auth)
+			ah.mongoHandler.SaveAuth(auth)
+			ah.RevokeToken(oldToken)
 		}
 
 		time.Sleep(1 * time.Hour)
@@ -83,6 +91,22 @@ func (ah *AuthenticationHandler) GetAuth() string {
 		panic("No auth found")
 	}
 	return auth.Token
+}
+
+func (ah *AuthenticationHandler) RevokeToken(token string) error {
+	client, err := helix.NewClient(&helix.Options{
+		ClientID: ah.config.Twitch.ClientID,
+	})
+	if err != nil {
+		return nil
+	}
+
+	_, err = client.RevokeUserAccessToken(token)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (ah *AuthenticationHandler) ValidateToken(token string) (
