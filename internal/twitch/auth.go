@@ -61,7 +61,7 @@ func (ah *AuthenticationHandler) RegenerateTokenJob() {
 		// if token expires in less than one day
 		auth := ah.mongoHandler.GetAuth()
 		oldToken := auth.Token
-		//if auth.ExpiresIn < 1000000 {
+
 		if auth.ExpiresIn < 10000 {
 			err := ah.mongoHandler.DeleteAuth()
 			if err != nil {
@@ -78,7 +78,10 @@ func (ah *AuthenticationHandler) RegenerateTokenJob() {
 			auth.ExpiresIn = resp.Data.ExpiresIn
 
 			ah.mongoHandler.SaveAuth(auth)
-			ah.RevokeToken(oldToken)
+			err = ah.RevokeToken(oldToken)
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		time.Sleep(1 * time.Hour)

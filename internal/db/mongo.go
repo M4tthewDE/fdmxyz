@@ -118,7 +118,6 @@ func (mh *MongoHandler) DeleteAuth() error {
 	}
 
 	return nil
-
 }
 
 func (mh *MongoHandler) GetPendingWebhook() *object.Webhook {
