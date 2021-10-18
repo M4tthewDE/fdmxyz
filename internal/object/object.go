@@ -25,7 +25,6 @@ const (
 type Authentication struct {
 	Token     string
 	ExpiresIn int
-	Secret    string
 }
 
 type EventSubNotification struct {
