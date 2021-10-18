@@ -1,3 +1,2 @@
 config.yml
-scripts/delete_at_twitch.sh
-scripts/get_from_twitch.sh
+scripts_actual
