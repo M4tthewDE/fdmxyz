@@ -36,7 +36,7 @@ func (th *Handler) RegisterWebhook(webhook *object.Webhook) (
 		Transport: helix.EventSubTransport{
 			Method:   "webhook",
 			Callback: th.Config.API.BaseURL + webhook.Callback,
-			Secret:   webhook.Secret,
+			Secret:   th.Config.Secret,
 		},
 	}
 

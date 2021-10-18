@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"math/rand"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -24,7 +25,19 @@ func GetConfig(file string) *Config {
 
 	f.Close()
 
+	config.Secret = randSeq(64)
+
 	return &config
+}
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }
 
 type Config struct {
@@ -44,4 +57,5 @@ type Config struct {
 	API struct {
 		BaseURL string `yaml:"base_url"`
 	} `yaml:"api"`
+	Secret string `yaml:"secret"`
 }

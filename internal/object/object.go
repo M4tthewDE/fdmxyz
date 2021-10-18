@@ -11,7 +11,6 @@ type Webhook struct {
 	UserID   string
 	Typing   string
 	Status   WebhookStatus
-	Secret   string
 	Callback string
 }
 
