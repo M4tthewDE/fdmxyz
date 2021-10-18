@@ -75,28 +75,6 @@ func (mh *MongoHandler) SaveAuth(auth *object.Authentication) primitive.ObjectID
 	return res.InsertedID.(primitive.ObjectID)
 }
 
-func (mh *MongoHandler) UpdateAuth(auth *object.Authentication) {
-	client := mh.getClient()
-	collection := client.Database(mh.Config.Database.Name).Collection("auth")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	doc, err := ToDoc(auth)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = collection.UpdateOne(
-		ctx,
-		bson.M{"Token": auth.Token},
-		doc,
-	)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func (mh *MongoHandler) GetAuth() *object.Authentication {
 	client := mh.getClient()
 	collection := client.Database(mh.Config.Database.Name).Collection("auth")
@@ -122,6 +100,24 @@ func (mh *MongoHandler) GetAuth() *object.Authentication {
 		}
 	}
 	return &auth
+}
+
+func (mh *MongoHandler) DeleteAuth() error {
+	client := mh.getClient()
+	collection := client.Database(mh.Config.Database.Name).Collection("auth")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := collection.DeleteMany(
+		ctx,
+		bson.D{},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (mh *MongoHandler) GetPendingWebhook() *object.Webhook {
